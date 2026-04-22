@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class SubscriptionResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => (string) $this->id,
+            'name' => $this->name,
+            'amount' => $this->amount,
+            'billingDay' => $this->billing_day,
+            'active' => (bool) $this->active,
+            'categoryId' => $this->category_id,
+            'createdAt' => $this->created_at?->toISOString(),
+            'updatedAt' => $this->updated_at?->toISOString(),
+            'deletedAt' => $this->deleted_at?->toISOString(),
+        ];
+    }
+}
