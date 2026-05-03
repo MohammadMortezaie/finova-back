@@ -73,4 +73,38 @@ class ReceiptAnalysisTest extends TestCase
             ->assertJsonPath('message', 'Receipt analysis failed.')
             ->assertJsonPath('error', 'Unauthorized token.');
     }
+
+    public function test_receipt_analysis_does_not_fill_form_with_ocr_blocks(): void
+    {
+        config([
+            'services.financial_management.url' => 'https://demo.webpulse.ca/api/financial-management',
+            'services.financial_management.token' => 'test-token',
+        ]);
+        Storage::fake('public');
+        Http::fake([
+            'https://demo.webpulse.ca/api/financial-management' => Http::response([
+                'data' => [
+                    'vendor' => "DEMO STORE\nSubtotal 10.00\nTax 1.20\nTotal 11.20",
+                    'total' => "DEMO STORE\nSubtotal 10.00\nTax 1.20\nTotal 11.20",
+                    'tax' => '1.20',
+                    'date' => 'receipt date somewhere in the OCR text',
+                    'description' => str_repeat('receipt text ', 30),
+                    'category' => "food\nother text",
+                ],
+            ]),
+        ]);
+
+        $response = $this->post('/receipt/analyze', [
+            'file' => UploadedFile::fake()->create('camera-receipt.jpg', 128, 'image/jpeg'),
+        ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.vendorName', null)
+            ->assertJsonPath('data.totalAmount', null)
+            ->assertJsonPath('data.taxAmount', 1.2)
+            ->assertJsonPath('data.date', null)
+            ->assertJsonPath('data.description', null)
+            ->assertJsonPath('data.categoryId', null);
+    }
 }

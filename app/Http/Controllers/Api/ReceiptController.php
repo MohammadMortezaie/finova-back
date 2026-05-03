@@ -76,20 +76,19 @@ class ReceiptController extends Controller
     private function normalizeAnalysis(?array $payload, string $receiptUri, string $originalName): array
     {
         $data = $this->analysisData($payload ?? []);
-        $baseName = pathinfo($originalName, PATHINFO_FILENAME);
-        $fallbackVendor = $baseName ? Str::title(str_replace(['-', '_'], ' ', $baseName)) : null;
-
         return [
-            'vendorName' => $this->firstValue($data, [
+            'vendorName' => $this->cleanShortText($this->firstValue($data, [
                 'vendorName',
                 'vendor_name',
-                'vendor',
                 'merchantName',
                 'merchant_name',
-                'merchant',
                 'storeName',
                 'store_name',
-            ]) ?? $fallbackVendor,
+                'businessName',
+                'business_name',
+                'supplierName',
+                'supplier_name',
+            ]), 80),
             'subtotalAmount' => $this->numericValue($this->firstValue($data, [
                 'subtotalAmount',
                 'subtotal_amount',
@@ -114,23 +113,23 @@ class ReceiptController extends Controller
                 'hst',
                 'pst',
             ])),
-            'date' => $this->firstValue($data, [
+            'date' => $this->cleanDate($this->firstValue($data, [
                 'date',
                 'receiptDate',
                 'receipt_date',
                 'transactionDate',
                 'transaction_date',
-            ]),
-            'description' => $this->firstValue($data, [
+            ])),
+            'description' => $this->cleanShortText($this->firstValue($data, [
                 'description',
                 'summary',
                 'note',
-            ]),
-            'categoryId' => $this->firstValue($data, [
+            ]), 140),
+            'categoryId' => $this->cleanShortText($this->firstValue($data, [
                 'categoryId',
                 'category_id',
                 'category',
-            ]),
+            ]), 60),
             'receiptUri' => $receiptUri,
             'raw' => $payload,
         ];
@@ -187,11 +186,57 @@ class ReceiptController extends Controller
         }
 
         if (is_string($value)) {
+            if (str_contains($value, "\n") || str_contains($value, "\r") || strlen($value) > 40) {
+                return null;
+            }
+
             $normalized = preg_replace('/[^0-9.-]/', '', $value);
 
             return is_numeric($normalized) ? (float) $normalized : null;
         }
 
         return null;
+    }
+
+    private function cleanShortText(mixed $value, int $maxLength): ?string
+    {
+        if (!is_string($value) && !is_numeric($value)) {
+            return null;
+        }
+
+        $text = trim((string) $value);
+        if ($text === '') {
+            return null;
+        }
+
+        if (str_contains($text, "\n") || str_contains($text, "\r")) {
+            return null;
+        }
+
+        $text = preg_replace('/\s+/', ' ', $text);
+        if (!$text || strlen($text) > $maxLength) {
+            return null;
+        }
+
+        return $text;
+    }
+
+    private function cleanDate(mixed $value): ?string
+    {
+        $text = $this->cleanShortText($value, 40);
+        if (!$text) {
+            return null;
+        }
+
+        if (!preg_match('/\d{4}|\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}/', $text)) {
+            return null;
+        }
+
+        $timestamp = strtotime($text);
+        if ($timestamp === false) {
+            return null;
+        }
+
+        return date('Y-m-d', $timestamp);
     }
 }
