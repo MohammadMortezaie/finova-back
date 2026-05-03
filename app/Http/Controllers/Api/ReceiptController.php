@@ -38,6 +38,7 @@ class ReceiptController extends Controller
             $response = Http::withHeaders([
                 'X-Api-Token' => $apiToken,
             ])
+                ->timeout(60)
                 ->attach('files[]', $stream, $file->getClientOriginalName())
                 ->post($apiUrl)
                 ->throw();
@@ -122,9 +123,32 @@ class ReceiptController extends Controller
                 'category_id',
                 'category',
             ]), 60),
+            'apiSuccess' => $this->apiSuccess($payload ?? []),
+            'apiMessage' => $this->apiMessage($payload ?? []),
             'receiptUri' => $receiptUri,
             'raw' => $payload,
         ];
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function apiSuccess(array $payload): ?bool
+    {
+        $value = Arr::get($payload, 'results.0.success', Arr::get($payload, 'success'));
+
+        return is_bool($value) ? $value : null;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function apiMessage(array $payload): ?string
+    {
+        return $this->cleanShortText(
+            Arr::get($payload, 'results.0.message', Arr::get($payload, 'message')),
+            160
+        );
     }
 
     /**
