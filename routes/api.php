@@ -35,3 +35,4 @@ Route::patch('/subs/{subscription}', [SubscriptionController::class, 'update']);
 Route::delete('/subs/{subscription}', [SubscriptionController::class, 'destroy']);
 
 Route::post('/receipt/analyze', [ReceiptController::class, 'analyze']);
+Route::get('/receipt/file/{path}', [ReceiptController::class, 'file'])->where('path', '.*');

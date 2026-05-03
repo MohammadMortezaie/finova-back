@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExpenseResource;
 use App\Models\Expense;
+use App\Support\PublicStorageUrl;
 use App\Support\UserProfileHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -191,7 +192,7 @@ class ExpenseController extends Controller
 
         $path = $file->storeAs($folder, $filename, 'public');
 
-        return Storage::disk('public')->url($path);
+        return PublicStorageUrl::fromPath($request, $path);
     }
 
     private function normalizeNegative(mixed $value): float

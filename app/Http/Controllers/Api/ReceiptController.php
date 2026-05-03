@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\PublicStorageUrl;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class ReceiptController extends Controller
 {
@@ -21,7 +21,7 @@ class ReceiptController extends Controller
 
         $file = $request->file('file');
         $path = $file->store('receipts', 'public');
-        $receiptUri = Storage::disk('public')->url($path);
+        $receiptUri = PublicStorageUrl::fromPath($request, $path);
 
         $apiUrl = config('services.financial_management.url');
         $apiToken = config('services.financial_management.token');
@@ -67,6 +67,15 @@ class ReceiptController extends Controller
         return response()->json([
             'data' => $analysis,
         ]);
+    }
+
+    public function file(string $path)
+    {
+        if (!Storage::disk('public')->exists($path)) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
+        return Storage::disk('public')->response($path);
     }
 
     /**
