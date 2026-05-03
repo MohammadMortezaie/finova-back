@@ -122,11 +122,11 @@ class ReceiptController extends Controller
                 'transactionDate',
                 'transaction_date',
             ])),
-            'description' => $this->cleanShortText($this->recursiveFirstValue($data, [
+            'description' => $this->cleanDescription($this->recursiveFirstValue($data, [
                 'description',
                 'summary',
                 'note',
-            ]), 140),
+            ])),
             'categoryId' => $this->cleanShortText($this->recursiveFirstValue($data, [
                 'categoryId',
                 'category_id',
@@ -348,6 +348,24 @@ class ReceiptController extends Controller
         $text = preg_replace('/\s+/', ' ', $text);
         if (!$text || strlen($text) > $maxLength) {
             return null;
+        }
+
+        return $text;
+    }
+
+    private function cleanDescription(mixed $value): ?string
+    {
+        $text = $this->cleanShortText($value, 500);
+        if (!$text) {
+            return null;
+        }
+
+        $words = preg_split('/\s+/', strtolower($text), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        if (count($words) > 30) {
+            $uniqueRatio = count(array_unique($words)) / count($words);
+            if ($uniqueRatio < 0.35) {
+                return null;
+            }
         }
 
         return $text;
