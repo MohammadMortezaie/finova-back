@@ -101,10 +101,89 @@ class ReceiptAnalysisTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('data.vendorName', null)
-            ->assertJsonPath('data.totalAmount', null)
+            ->assertJsonPath('data.totalAmount', 11.2)
             ->assertJsonPath('data.taxAmount', 1.2)
             ->assertJsonPath('data.date', null)
             ->assertJsonPath('data.description', null)
             ->assertJsonPath('data.categoryId', null);
+    }
+
+    public function test_receipt_analysis_extracts_amounts_from_nested_ocr_text(): void
+    {
+        config([
+            'services.financial_management.url' => 'https://demo.webpulse.ca/api/financial-management',
+            'services.financial_management.token' => 'test-token',
+        ]);
+        Storage::fake('public');
+        Http::fake([
+            'https://demo.webpulse.ca/api/financial-management' => Http::response([
+                'success' => true,
+                'data' => [
+                    [
+                        'ocr_text' => "SHOP NAME\nSubtotal $13.45\nTax $1.63\nTotal $15.08\nVisa $15.08",
+                        'details' => [
+                            'merchant_name' => 'Shop Name',
+                        ],
+                    ],
+                ],
+            ]),
+        ]);
+
+        $response = $this->post('/receipt/analyze', [
+            'file' => UploadedFile::fake()->create('receipt.jpg', 128, 'image/jpeg'),
+        ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.vendorName', 'Shop Name')
+            ->assertJsonPath('data.subtotalAmount', 13.45)
+            ->assertJsonPath('data.taxAmount', 1.63)
+            ->assertJsonPath('data.totalAmount', 15.08);
+    }
+
+    public function test_receipt_analysis_maps_financial_management_analysis_payload(): void
+    {
+        config([
+            'services.financial_management.url' => 'https://demo.webpulse.ca/api/financial-management',
+            'services.financial_management.token' => 'test-token',
+        ]);
+        Storage::fake('public');
+        Http::fake([
+            'https://demo.webpulse.ca/api/financial-management' => Http::response([
+                'success' => true,
+                'message' => 'Analysis completed.',
+                'analysis' => [
+                    'date' => '2023-10-05 00:00:00',
+                    'type' => 'Income',
+                    'amount' => 10,
+                    'subtotal' => null,
+                    'shipping_amount' => null,
+                    'pst' => null,
+                    'gst' => null,
+                    'currency' => 'USD',
+                    'description' => 'Shanghai ABC Company Ltd - Textile Hanger Sample (100% Nylon) - Invoice #',
+                    'invoice_number' => '',
+                    'vendor_name' => 'Shanghai ABC Company Ltd',
+                    'po_number' => null,
+                    'due_date' => null,
+                    'category' => 'Other',
+                    'file_type' => 'photo',
+                    'file_path' => 'chatbot/files/example.jpg',
+                ],
+            ]),
+        ]);
+
+        $response = $this->post('/receipt/analyze', [
+            'file' => UploadedFile::fake()->create('receipt.jpg', 128, 'image/jpeg'),
+        ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.vendorName', 'Shanghai ABC Company Ltd')
+            ->assertJsonPath('data.totalAmount', 10)
+            ->assertJsonPath('data.taxAmount', null)
+            ->assertJsonPath('data.date', '2023-10-05')
+            ->assertJsonPath('data.description', 'Shanghai ABC Company Ltd - Textile Hanger Sample (100% Nylon) - Invoice #')
+            ->assertJsonPath('data.categoryId', 'Other');
     }
 }

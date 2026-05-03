@@ -76,8 +76,9 @@ class ReceiptController extends Controller
     private function normalizeAnalysis(?array $payload, string $receiptUri, string $originalName): array
     {
         $data = $this->analysisData($payload ?? []);
+
         return [
-            'vendorName' => $this->cleanShortText($this->firstValue($data, [
+            'vendorName' => $this->cleanShortText($this->recursiveFirstValue($data, [
                 'vendorName',
                 'vendor_name',
                 'merchantName',
@@ -89,43 +90,34 @@ class ReceiptController extends Controller
                 'supplierName',
                 'supplier_name',
             ]), 80),
-            'subtotalAmount' => $this->numericValue($this->firstValue($data, [
+            'subtotalAmount' => $this->amountValue($data, [
                 'subtotalAmount',
                 'subtotal_amount',
                 'subtotal',
                 'sub_total',
-            ])),
-            'totalAmount' => $this->numericValue($this->firstValue($data, [
+            ], ['subtotal', 'sub total']),
+            'totalAmount' => $this->amountValue($data, [
                 'totalAmount',
                 'total_amount',
                 'total',
                 'grandTotal',
                 'grand_total',
                 'amount',
-            ])),
-            'taxAmount' => $this->numericValue($this->firstValue($data, [
-                'taxAmount',
-                'tax_amount',
-                'tax',
-                'gstAmount',
-                'gst_amount',
-                'gst',
-                'hst',
-                'pst',
-            ])),
-            'date' => $this->cleanDate($this->firstValue($data, [
+            ], ['total', 'grand total', 'amount due', 'balance due']),
+            'taxAmount' => $this->taxAmountValue($data),
+            'date' => $this->cleanDate($this->recursiveFirstValue($data, [
                 'date',
                 'receiptDate',
                 'receipt_date',
                 'transactionDate',
                 'transaction_date',
             ])),
-            'description' => $this->cleanShortText($this->firstValue($data, [
+            'description' => $this->cleanShortText($this->recursiveFirstValue($data, [
                 'description',
                 'summary',
                 'note',
             ]), 140),
-            'categoryId' => $this->cleanShortText($this->firstValue($data, [
+            'categoryId' => $this->cleanShortText($this->recursiveFirstValue($data, [
                 'categoryId',
                 'category_id',
                 'category',
@@ -136,6 +128,36 @@ class ReceiptController extends Controller
     }
 
     /**
+     * @param array<string, mixed> $data
+     */
+    private function taxAmountValue(array $data): ?float
+    {
+        $direct = $this->amountValue($data, [
+                'taxAmount',
+                'tax_amount',
+                'tax',
+                'gstAmount',
+                'gst_amount',
+                'gst',
+                'hst',
+                'pst',
+            ], ['tax', 'gst', 'hst', 'pst']);
+        if ($direct !== null) {
+            return $direct;
+        }
+
+        $components = [];
+        foreach (['gst', 'pst', 'hst'] as $key) {
+            $value = $this->numericValue($this->recursiveFirstValue($data, [$key]));
+            if ($value !== null) {
+                $components[] = $value;
+            }
+        }
+
+        return $components ? array_sum($components) : null;
+    }
+
+    /**
      * @param array<string, mixed> $payload
      *
      * @return array<string, mixed>
@@ -143,10 +165,10 @@ class ReceiptController extends Controller
     private function analysisData(array $payload): array
     {
         $candidates = [
+            Arr::get($payload, 'analysis'),
             Arr::get($payload, 'data'),
             Arr::get($payload, 'result'),
             Arr::get($payload, 'results.0'),
-            Arr::get($payload, 'analysis'),
             $payload,
         ];
 
@@ -163,7 +185,7 @@ class ReceiptController extends Controller
      * @param array<string, mixed> $data
      * @param array<int, string> $keys
      */
-    private function firstValue(array $data, array $keys): mixed
+    private function recursiveFirstValue(array $data, array $keys): mixed
     {
         foreach ($keys as $key) {
             $value = Arr::get($data, $key);
@@ -172,7 +194,31 @@ class ReceiptController extends Controller
             }
         }
 
+        foreach ($data as $value) {
+            if (is_array($value)) {
+                $found = $this->recursiveFirstValue($value, $keys);
+                if ($found !== null && $found !== '') {
+                    return $found;
+                }
+            }
+        }
+
         return null;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<int, string> $keys
+     * @param array<int, string> $labels
+     */
+    private function amountValue(array $data, array $keys, array $labels): ?float
+    {
+        $direct = $this->numericValue($this->recursiveFirstValue($data, $keys));
+        if ($direct !== null) {
+            return $direct;
+        }
+
+        return $this->labeledAmount($data, $labels);
     }
 
     private function numericValue(mixed $value): ?float
@@ -196,6 +242,59 @@ class ReceiptController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<int, string> $labels
+     */
+    private function labeledAmount(array $data, array $labels): ?float
+    {
+        $matches = [];
+        foreach ($this->stringValues($data) as $text) {
+            $lines = preg_split('/\R+/', $text) ?: [$text];
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if ($line === '') {
+                    continue;
+                }
+
+                foreach ($labels as $label) {
+                    if (!preg_match('/\b' . preg_quote($label, '/') . '\b/i', $line)) {
+                        continue;
+                    }
+
+                    preg_match_all('/-?\$?\s*([0-9]+(?:[,.][0-9]{2})?)/', $line, $amounts);
+                    $last = end($amounts[1]);
+                    if ($last !== false) {
+                        $matches[] = (float) str_replace(',', '.', $last);
+                    }
+                }
+            }
+        }
+
+        return $matches ? end($matches) : null;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<int, string>
+     */
+    private function stringValues(array $data): array
+    {
+        $values = [];
+        foreach ($data as $value) {
+            if (is_string($value)) {
+                $values[] = $value;
+            } elseif (is_numeric($value)) {
+                $values[] = (string) $value;
+            } elseif (is_array($value)) {
+                $values = array_merge($values, $this->stringValues($value));
+            }
+        }
+
+        return $values;
     }
 
     private function cleanShortText(mixed $value, int $maxLength): ?string
