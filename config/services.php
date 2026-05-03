@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'financial_management' => [
+        'url' => env('FINANCIAL_MANAGEMENT_API_URL', 'https://demo.webpulse.ca/api/financial-management'),
+        'token' => env('FINANCIAL_MANAGEMENT_API_TOKEN'),
+    ],
+
 ];
