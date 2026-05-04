@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Expense;
 use App\Support\PublicStorageUrl;
+use App\Support\UserProfileHelper;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -13,6 +15,54 @@ use Illuminate\Support\Facades\Storage;
 
 class ReceiptController extends Controller
 {
+    public function index(Request $request)
+    {
+        $user = UserProfileHelper::resolveFromRequest($request);
+        if (!$user) {
+            return response()->json([
+                'data' => [],
+                'meta' => [
+                    'currentPage' => 1,
+                    'lastPage' => 1,
+                    'perPage' => 24,
+                    'total' => 0,
+                    'hasMore' => false,
+                ],
+            ]);
+        }
+
+        $perPage = max(1, min((int) $request->integer('perPage', 24), 60));
+
+        $receipts = Expense::query()
+            ->where('user_id', $user->id)
+            ->whereNull('deleted_at')
+            ->whereNotNull('receipt_uri')
+            ->where('receipt_uri', '!=', '')
+            ->orderByDesc('date')
+            ->orderByDesc('id')
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => $receipts->getCollection()->map(fn (Expense $expense) => [
+                'id' => (string) $expense->id,
+                'expenseId' => (string) $expense->id,
+                'uri' => $expense->receipt_uri,
+                'vendorName' => $expense->vendor_name,
+                'description' => $expense->description,
+                'totalAmount' => $expense->total_amount,
+                'date' => $expense->date?->toDateString(),
+                'createdAt' => $expense->created_at?->toISOString(),
+            ])->values(),
+            'meta' => [
+                'currentPage' => $receipts->currentPage(),
+                'lastPage' => $receipts->lastPage(),
+                'perPage' => $receipts->perPage(),
+                'total' => $receipts->total(),
+                'hasMore' => $receipts->hasMorePages(),
+            ],
+        ]);
+    }
+
     public function analyze(Request $request)
     {
         $request->validate([
