@@ -23,6 +23,8 @@ class User extends Authenticatable
         'password',
         'language',
         'currency',
+        'email_verification_code',
+        'email_verification_expires_at',
         'is_active',
         'plan',
         'total_income',
@@ -49,6 +51,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'email_verification_expires_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
             'total_income' => 'float',

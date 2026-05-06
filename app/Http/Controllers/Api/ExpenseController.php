@@ -32,6 +32,14 @@ class ExpenseController extends Controller
             $query->whereNull('deleted_at');
         }
 
+        if ($request->filled('from')) {
+            $query->whereDate('date', '>=', $request->query('from'));
+        }
+
+        if ($request->filled('to')) {
+            $query->whereDate('date', '<=', $request->query('to'));
+        }
+
         return ExpenseResource::collection($query->get());
     }
 

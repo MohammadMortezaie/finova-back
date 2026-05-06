@@ -34,26 +34,46 @@ class UserController extends Controller
             UserProfileHelper::resolveFromRequest($request)
         );
 
+        $expenseQuery = $user
+            ? Expense::query()
+                ->where('user_id', $user->id)
+                ->whereNull('deleted_at')
+                ->orderByDesc('date')
+                ->orderByDesc('id')
+            : null;
+
+        $incomeQuery = $user
+            ? Income::query()
+                ->where('user_id', $user->id)
+                ->whereNull('deleted_at')
+                ->orderByDesc('date')
+                ->orderByDesc('id')
+            : null;
+
+        if ($expenseQuery && $request->filled('from')) {
+            $expenseQuery->whereDate('date', '>=', $request->query('from'));
+        }
+
+        if ($expenseQuery && $request->filled('to')) {
+            $expenseQuery->whereDate('date', '<=', $request->query('to'));
+        }
+
+        if ($incomeQuery && $request->filled('from')) {
+            $incomeQuery->whereDate('date', '>=', $request->query('from'));
+        }
+
+        if ($incomeQuery && $request->filled('to')) {
+            $incomeQuery->whereDate('date', '<=', $request->query('to'));
+        }
+
         return response()->json([
             'data' => [
                 'user' => $user ? (new UserResource($user))->resolve() : null,
                 'expenses' => ExpenseResource::collection(
-                    $user
-                        ? Expense::query()
-                            ->where('user_id', $user->id)
-                            ->orderByDesc('date')
-                            ->orderByDesc('id')
-                            ->get()
-                        : collect()
+                    $expenseQuery ? $expenseQuery->get() : collect()
                 )->resolve(),
                 'incomes' => IncomeResource::collection(
-                    $user
-                        ? Income::query()
-                            ->where('user_id', $user->id)
-                            ->orderByDesc('date')
-                            ->orderByDesc('id')
-                            ->get()
-                        : collect()
+                    $incomeQuery ? $incomeQuery->get() : collect()
                 )->resolve(),
                 'subscriptions' => SubscriptionResource::collection(
                     $user
