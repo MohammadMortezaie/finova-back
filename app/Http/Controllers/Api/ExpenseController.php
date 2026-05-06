@@ -40,6 +40,11 @@ class ExpenseController extends Controller
             $query->whereDate('date', '<=', $request->query('to'));
         }
 
+        if ($request->filled('page') || $request->filled('perPage')) {
+            $perPage = min(max((int) $request->query('perPage', 30), 1), 100);
+            return ExpenseResource::collection($query->paginate($perPage));
+        }
+
         return ExpenseResource::collection($query->get());
     }
 
