@@ -17,9 +17,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $user = UserProfileHelper::syncIncomeExpenseTotals(
-            UserProfileHelper::resolveFromRequest($request)
-        );
+        $user = UserProfileHelper::resolveFromRequest($request);
 
         if (!$user) {
             return response()->json(['data' => null]);
@@ -30,9 +28,7 @@ class UserController extends Controller
 
     public function fetchAll(Request $request)
     {
-        $user = UserProfileHelper::syncIncomeExpenseTotals(
-            UserProfileHelper::resolveFromRequest($request)
-        );
+        $user = UserProfileHelper::resolveFromRequest($request);
 
         $expenseQuery = $user
             ? Expense::query()
