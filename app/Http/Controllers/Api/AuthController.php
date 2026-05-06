@@ -215,6 +215,9 @@ class AuthController extends Controller
         $html = <<<HTML
 <!doctype html>
 <html>
+<head>
+  <title>Webpulse AI verification code</title>
+</head>
 <body style="margin:0;padding:0;background:#f4f7f6;font-family:Arial,Helvetica,sans-serif;color:#1c2520;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7f6;padding:32px 16px;">
     <tr>
