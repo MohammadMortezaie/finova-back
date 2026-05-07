@@ -129,6 +129,43 @@ class StripeUpgradeController extends Controller
         ]);
     }
 
+    public function portal(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+            'return_url' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        if (!config('services.stripe.secret')) {
+            return redirect()->route('upgrade.show', [
+                'email' => $data['email'],
+            ])->withErrors(['stripe' => 'Stripe is not configured yet.']);
+        }
+
+        $user = User::where('email', $data['email'])->first();
+        if (!$user || !$user->stripe_customer_id) {
+            return redirect()->route('upgrade.show', [
+                'email' => $data['email'],
+            ])->withErrors(['stripe' => 'No active Stripe customer was found for this account.']);
+        }
+
+        $returnUrl = $data['return_url'] ?: 'finova://upgrade-success';
+        $response = Http::asForm()
+            ->withToken((string) config('services.stripe.secret'))
+            ->post('https://api.stripe.com/v1/billing_portal/sessions', [
+                'customer' => $user->stripe_customer_id,
+                'return_url' => $returnUrl,
+            ]);
+
+        if (!$response->successful()) {
+            return redirect()->route('upgrade.show', [
+                'email' => $data['email'],
+            ])->withErrors(['stripe' => $response->json('error.message') ?: 'Stripe subscription portal could not be opened.']);
+        }
+
+        return redirect()->away((string) $response->json('url'));
+    }
+
     private function normalizePlan(mixed $plan): string
     {
         return array_key_exists((string) $plan, self::PLANS) ? (string) $plan : 'weekly';

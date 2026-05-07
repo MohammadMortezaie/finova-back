@@ -14,3 +14,4 @@ Route::get('/receipt/file/{path}', [ReceiptController::class, 'file'])->where('p
 Route::get('/upgrade', [StripeUpgradeController::class, 'show'])->name('upgrade.show');
 Route::post('/upgrade/checkout', [StripeUpgradeController::class, 'checkout'])->name('upgrade.checkout');
 Route::get('/upgrade/success', [StripeUpgradeController::class, 'success'])->name('upgrade.success');
+Route::get('/stripe/portal', [StripeUpgradeController::class, 'portal'])->name('stripe.portal');
