@@ -26,11 +26,29 @@ class StripeWebhookController extends Controller
         $type = (string) ($event['type'] ?? '');
         $object = $event['data']['object'] ?? [];
 
-        if (in_array($type, ['customer.subscription.updated', 'customer.subscription.deleted'], true)) {
+        if (in_array($type, ['customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted'], true)) {
             $this->syncSubscription($object, $type);
+        }
+        if ($type === 'invoice.payment_succeeded') {
+            $this->syncInvoiceSubscription($object);
         }
 
         return response()->json(['received' => true]);
+    }
+
+    private function syncInvoiceSubscription(array $invoice): void
+    {
+        $subscriptionId = (string) ($invoice['subscription'] ?? data_get($invoice, 'parent.subscription_details.subscription', ''));
+        if ($subscriptionId === '' || !config('services.stripe.secret')) {
+            return;
+        }
+
+        $response = Http::withToken((string) config('services.stripe.secret'))
+            ->get("https://api.stripe.com/v1/subscriptions/{$subscriptionId}");
+
+        if ($response->successful()) {
+            $this->syncSubscription($response->json(), 'customer.subscription.updated');
+        }
     }
 
     private function syncSubscription(array $subscription, string $eventType): void
