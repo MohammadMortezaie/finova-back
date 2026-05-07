@@ -138,7 +138,7 @@
 
             @unless ($stripeReady)
                 <div class="setup">
-                    Stripe checkout is not configured yet. Add STRIPE_SECRET, STRIPE_WEEKLY_PRICE_ID, and STRIPE_MONTHLY_PRICE_ID on the Laravel server.
+                    Stripe checkout is not configured yet. Add STRIPE_SECRET, STRIPE_WEEKLY_PRICE_ID, and STRIPE_YEARLY_PRICE_ID on the Laravel server.
                 </div>
             @endunless
 

@@ -16,10 +16,10 @@ class StripeUpgradeController extends Controller
             'price' => '$2.99 / week',
             'config_key' => 'weekly_price_id',
         ],
-        'monthly' => [
-            'label' => 'Monthly Pro',
-            'price' => '$19.99 / month',
-            'config_key' => 'monthly_price_id',
+        'yearly' => [
+            'label' => 'Yearly Pro',
+            'price' => '$79.99 / year',
+            'config_key' => 'yearly_price_id',
         ],
     ];
 
@@ -42,7 +42,7 @@ class StripeUpgradeController extends Controller
         $data = $request->validate([
             'email' => ['required', 'email'],
             'name' => ['nullable', 'string', 'max:255'],
-            'plan' => ['required', 'in:weekly,monthly'],
+            'plan' => ['required', 'in:weekly,yearly'],
             'return_url' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -115,7 +115,7 @@ class StripeUpgradeController extends Controller
                 if ($email !== '') {
                     User::where('email', $email)->update([
                         'plan' => 'pro',
-                        'plan_expires_at' => $paidPlan === 'monthly' ? now()->addMonth() : now()->addWeek(),
+                        'plan_expires_at' => $paidPlan === 'yearly' ? now()->addYear() : now()->addWeek(),
                         'stripe_customer_id' => $response->json('customer'),
                         'stripe_subscription_id' => $response->json('subscription'),
                     ]);
@@ -143,6 +143,6 @@ class StripeUpgradeController extends Controller
     {
         return filled(config('services.stripe.secret'))
             && filled(config('services.stripe.weekly_price_id'))
-            && filled(config('services.stripe.monthly_price_id'));
+            && filled(config('services.stripe.yearly_price_id'));
     }
 }
