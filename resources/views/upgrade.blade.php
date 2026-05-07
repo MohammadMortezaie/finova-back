@@ -33,6 +33,20 @@
             font-size: 32px;
             line-height: 1.1;
         }
+        .identity {
+            color: var(--text);
+            background: rgba(29, 185, 84, 0.12);
+            border: 1px solid rgba(29, 185, 84, 0.35);
+            border-radius: 14px;
+            padding: 12px;
+            margin: 16px 0 0;
+        }
+        .identity span {
+            color: var(--muted);
+            display: block;
+            font-size: 14px;
+            margin-top: 2px;
+        }
         p {
             color: var(--muted);
             line-height: 1.5;
@@ -105,6 +119,10 @@
     <main>
         <h1>Upgrade to Pro</h1>
         <p>Unlock exports, AI receipt extraction, unlimited uploads, and cloud receipt storage.</p>
+        <div class="identity">
+            {{ $name !== '' ? $name : 'Finova user' }}
+            <span>{{ $email }}</span>
+        </div>
 
         <section class="panel">
             <ul>
@@ -127,6 +145,7 @@
             <form method="post" action="{{ route('upgrade.checkout') }}">
                 @csrf
                 <input type="hidden" name="email" value="{{ old('email', $email) }}">
+                <input type="hidden" name="name" value="{{ old('name', $name) }}">
                 <input type="hidden" name="return_url" value="{{ old('return_url', $returnUrl) }}">
 
                 @foreach ($plans as $key => $plan)

@@ -29,6 +29,7 @@ class StripeUpgradeController extends Controller
 
         return view('upgrade', [
             'email' => (string) $request->query('email', ''),
+            'name' => (string) $request->query('name', ''),
             'returnUrl' => (string) $request->query('return_url', 'finova://upgrade-success'),
             'selectedPlan' => $plan,
             'plans' => self::PLANS,
@@ -40,6 +41,7 @@ class StripeUpgradeController extends Controller
     {
         $data = $request->validate([
             'email' => ['required', 'email'],
+            'name' => ['nullable', 'string', 'max:255'],
             'plan' => ['required', 'in:weekly,monthly'],
             'return_url' => ['nullable', 'string', 'max:500'],
         ]);
@@ -72,10 +74,15 @@ class StripeUpgradeController extends Controller
                 'customer_email' => $data['email'],
                 'client_reference_id' => $data['email'],
                 'metadata[email]' => $data['email'],
+                'metadata[name]' => $data['name'] ?? '',
                 'metadata[plan]' => $data['plan'],
+                'subscription_data[metadata][email]' => $data['email'],
+                'subscription_data[metadata][name]' => $data['name'] ?? '',
+                'subscription_data[metadata][plan]' => $data['plan'],
                 'success_url' => $successUrl,
                 'cancel_url' => route('upgrade.show', [
                     'email' => $data['email'],
+                    'name' => $data['name'] ?? '',
                     'plan' => $data['plan'],
                     'return_url' => $returnUrl,
                 ]),
@@ -109,6 +116,8 @@ class StripeUpgradeController extends Controller
                     User::where('email', $email)->update([
                         'plan' => 'pro',
                         'plan_expires_at' => $paidPlan === 'monthly' ? now()->addMonth() : now()->addWeek(),
+                        'stripe_customer_id' => $response->json('customer'),
+                        'stripe_subscription_id' => $response->json('subscription'),
                     ]);
                 }
             }

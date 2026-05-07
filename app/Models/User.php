@@ -28,6 +28,8 @@ class User extends Authenticatable
         'is_active',
         'plan',
         'plan_expires_at',
+        'stripe_customer_id',
+        'stripe_subscription_id',
         'total_income',
         'total_expense',
         'total_subscription',
