@@ -78,8 +78,12 @@ class PasswordResetController extends Controller
         $user->email_verification_expires_at = null;
         $user->save();
 
-        return redirect()->route('password.forgot')
-            ->with('status', 'Password updated. You can return to the app and log in.');
+        return redirect()->route('password.reset.success');
+    }
+
+    public function success(): View
+    {
+        return view('password-reset-success');
     }
 
     private function sendResetEmail(User $user, string $code): void
