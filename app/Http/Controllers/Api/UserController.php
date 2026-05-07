@@ -12,6 +12,8 @@ use App\Models\Income;
 use App\Models\Subscription;
 use App\Support\UserProfileHelper;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -81,6 +83,45 @@ class UserController extends Controller
                 )->resolve(),
             ],
         ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = UserProfileHelper::resolveFromRequest($request);
+        if (!$user) {
+            return response()->json(['message' => 'Account not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $user->name = $data['name'];
+        $user->save();
+
+        return new UserResource($user);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = UserProfileHelper::resolveFromRequest($request);
+        if (!$user) {
+            return response()->json(['message' => 'Account not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $data = $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if (!Hash::check($data['current_password'], $user->password)) {
+            return response()->json(['message' => 'Current password is incorrect.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $user->password = Hash::make($data['password']);
+        $user->save();
+
+        return response()->json(['data' => ['message' => 'Password updated.']]);
     }
 
 }

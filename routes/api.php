@@ -21,6 +21,8 @@ Route::post('/export', [ExportController::class, 'link']);
 Route::get('/export/{token}', [ExportController::class, 'download']);
 
 Route::get('/users', [UserController::class, 'index']);
+Route::patch('/users/profile', [UserController::class, 'updateProfile']);
+Route::patch('/users/password', [UserController::class, 'changePassword']);
 Route::get('/fetch-all', [UserController::class, 'fetchAll']);
 Route::get('/fetchAll', [UserController::class, 'fetchAll']);
 
