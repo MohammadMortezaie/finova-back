@@ -40,4 +40,11 @@ return [
         'token' => env('FINANCIAL_MANAGEMENT_API_TOKEN'),
     ],
 
+    'stripe' => [
+        'publishable' => env('STRIPE_PUBLISHABLE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'weekly_price_id' => env('STRIPE_WEEKLY_PRICE_ID'),
+        'monthly_price_id' => env('STRIPE_MONTHLY_PRICE_ID'),
+    ],
+
 ];
