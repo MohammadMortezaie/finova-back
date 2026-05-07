@@ -217,7 +217,7 @@ class AuthController extends Controller
 <!doctype html>
 <html>
 <head>
-  <title>Finova verification code</title>
+  <title>Webpulse AI verification code</title>
 </head>
 <body style="margin:0;padding:0;background:#f4f7f6;font-family:Arial,Helvetica,sans-serif;color:#1c2520;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7f6;padding:32px 16px;">
@@ -226,7 +226,7 @@ class AuthController extends Controller
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #dfe7e2;">
           <tr>
             <td style="padding:28px 28px 18px;background:#111814;color:#ffffff;">
-              <div style="font-size:14px;color:#73d99f;font-weight:700;letter-spacing:.4px;">FINOVA</div>
+              <div style="font-size:14px;color:#73d99f;font-weight:700;letter-spacing:.4px;">WEBPULSE AI</div>
               <h1 style="margin:10px 0 0;font-size:26px;line-height:32px;font-weight:800;">Verify your email</h1>
             </td>
           </tr>
@@ -251,7 +251,7 @@ HTML;
         Mail::html($html, function ($message) use ($user) {
             $message
                 ->to($user->email, $user->name)
-                ->subject('Your Finova verification code');
+                ->subject('Your Webpulse AI verification code');
         });
     }
 }
