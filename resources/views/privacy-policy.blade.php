@@ -53,7 +53,7 @@
         <p>You are responsible for maintaining your own backups of important financial records, receipts, exports, and account information. To the maximum extent permitted by law, Money Management, Webpulse, and their owners, employees, contractors, and service providers are not responsible or liable for lost, corrupted, deleted, delayed, unavailable, or unrecoverable data, whether caused by user action, device failure, network issues, software defects, server failure, third-party services, unauthorized access, or any other cause.</p>
 
         <h2>8. Your Choices</h2>
-        <p>You can choose not to grant camera or photo permissions, but receipt photo features may not work. You may update certain account preferences in the app. You may contact us to request access, correction, or deletion of personal information, subject to legal, security, and operational requirements.</p>
+        <p>You can choose not to grant camera or photo permissions, but receipt photo features may not work. You may update certain account preferences in the app. You may contact us at <a href="mailto:info@webpulse.ca">info@webpulse.ca</a> to request access, correction, or deletion of personal information, subject to legal, security, and operational requirements.</p>
         <p>You can request deletion of your account and associated app data by following the instructions on our <a href="{{ route('legal.delete-account') }}">Delete Account</a> page.</p>
 
         <h2>9. Data Retention</h2>
@@ -69,7 +69,7 @@
         <p>We may update this Privacy Policy from time to time by posting a new version on this page. Continued use of the app after an update means you accept the updated policy.</p>
 
         <h2>13. Contact</h2>
-        <p>Questions about this Privacy Policy can be sent through the contact information published on our website.</p>
+        <p>Questions about this Privacy Policy can be sent to <a href="mailto:info@webpulse.ca">info@webpulse.ca</a>.</p>
 
         <p><a href="{{ route('legal.terms') }}">View Terms & Conditions</a></p>
     </main>

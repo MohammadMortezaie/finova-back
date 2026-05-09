@@ -69,7 +69,7 @@
         <p>These terms are governed by the laws of British Columbia, Canada, except where local law requires otherwise.</p>
 
         <h2>14. Contact</h2>
-        <p>Questions about these Terms & Conditions can be sent through the contact information published on our website.</p>
+        <p>Questions about these Terms & Conditions can be sent to <a href="mailto:info@webpulse.ca">info@webpulse.ca</a>.</p>
 
         <p><a href="{{ route('legal.privacy') }}">View Privacy Policy</a></p>
     </main>

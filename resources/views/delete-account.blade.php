@@ -25,7 +25,7 @@
         <p class="notice">This page explains how Money Management users can request deletion of their account and associated app data.</p>
 
         <h2>How to Request Account Deletion</h2>
-        <p>To request deletion of your Money Management account, contact us using the contact information published on our website and include the email address associated with your account.</p>
+        <p>To request deletion of your Money Management account, email <a href="mailto:info@webpulse.ca">info@webpulse.ca</a> and include the email address associated with your account.</p>
         <p>For security, we may ask you to verify ownership of the account before deletion is completed.</p>
 
         <h2>What We Delete</h2>
@@ -45,7 +45,7 @@
         <p>We aim to process verified account deletion requests within 30 days. Some retained backup or legal records may take longer to expire according to operational, legal, or security requirements.</p>
 
         <h2>Partial Data Deletion</h2>
-        <p>If you want to delete individual expenses, income records, subscriptions, or receipt records without deleting your account, use the controls available inside the app where provided. If a specific record cannot be deleted in the app, contact us with your request.</p>
+        <p>If you want to delete individual expenses, income records, subscriptions, or receipt records without deleting your account, use the controls available inside the app where provided. If a specific record cannot be deleted in the app, email <a href="mailto:info@webpulse.ca">info@webpulse.ca</a> with your request.</p>
 
         <h2>Before You Delete</h2>
         <p>Account deletion may be permanent. You are responsible for exporting or saving any information you want to keep before requesting deletion. Money Management is not responsible for data that is deleted or becomes unavailable after an account deletion request is processed.</p>
