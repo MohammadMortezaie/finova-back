@@ -10,6 +10,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::view('/privacy-policy', 'privacy-policy')->name('legal.privacy');
+Route::view('/terms-and-conditions', 'terms-and-conditions')->name('legal.terms');
 Route::get('/export/{token}', [ExportController::class, 'download']);
 Route::get('/receipt/file/{path}', [ReceiptController::class, 'file'])->where('path', '.*');
 Route::get('/upgrade', [StripeUpgradeController::class, 'show'])->name('upgrade.show');
