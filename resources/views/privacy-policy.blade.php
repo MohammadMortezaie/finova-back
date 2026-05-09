@@ -54,6 +54,7 @@
 
         <h2>8. Your Choices</h2>
         <p>You can choose not to grant camera or photo permissions, but receipt photo features may not work. You may update certain account preferences in the app. You may contact us to request access, correction, or deletion of personal information, subject to legal, security, and operational requirements.</p>
+        <p>You can request deletion of your account and associated app data by following the instructions on our <a href="{{ route('legal.delete-account') }}">Delete Account</a> page.</p>
 
         <h2>9. Data Retention</h2>
         <p>We retain information for as long as needed to provide the app, comply with legal obligations, resolve disputes, enforce agreements, and maintain security. Deleted data may remain in backups or logs for a limited period.</p>
