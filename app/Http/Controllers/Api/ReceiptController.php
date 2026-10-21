@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
+use App\Services\OpenAiFinancialAnalyzer;
 use App\Support\PublicStorageUrl;
 use App\Support\UserProfileHelper;
 use Illuminate\Http\Client\RequestException;
@@ -12,13 +13,14 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class ReceiptController extends Controller
 {
     public function index(Request $request)
     {
         $user = UserProfileHelper::resolveFromRequest($request);
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'data' => [],
                 'meta' => [
@@ -73,10 +75,26 @@ class ReceiptController extends Controller
         $path = $file->store('receipts', 'public');
         $receiptUri = PublicStorageUrl::fromPath($request, $path);
 
+        $openAiKey = config('services.openai.key');
+        if (is_string($openAiKey) && $openAiKey !== '') {
+            try {
+                $payload = app(OpenAiFinancialAnalyzer::class)->analyze($file);
+            } catch (RuntimeException $exception) {
+                return response()->json([
+                    'message' => 'Receipt analysis failed.',
+                    'error' => $exception->getMessage(),
+                ], Response::HTTP_BAD_GATEWAY);
+            }
+
+            return response()->json([
+                'data' => $this->normalizeAnalysis($payload, $receiptUri, $file->getClientOriginalName()),
+            ]);
+        }
+
         $apiUrl = config('services.financial_management.url');
         $apiToken = config('services.financial_management.token');
 
-        if (!$apiToken) {
+        if (! $apiToken) {
             return response()->json([
                 'message' => 'Financial management API token is not configured.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -121,7 +139,7 @@ class ReceiptController extends Controller
 
     public function file(string $path)
     {
-        if (!Storage::disk('public')->exists($path)) {
+        if (! Storage::disk('public')->exists($path)) {
             abort(Response::HTTP_NOT_FOUND);
         }
 
@@ -129,8 +147,7 @@ class ReceiptController extends Controller
     }
 
     /**
-     * @param array<string, mixed>|null $payload
-     *
+     * @param  array<string, mixed>|null  $payload
      * @return array<string, mixed>
      */
     private function normalizeAnalysis(?array $payload, string $receiptUri, string $originalName): array
@@ -190,7 +207,7 @@ class ReceiptController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      */
     private function apiSuccess(array $payload): ?bool
     {
@@ -200,7 +217,7 @@ class ReceiptController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      */
     private function apiMessage(array $payload): ?string
     {
@@ -211,20 +228,20 @@ class ReceiptController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     private function taxAmountValue(array $data): ?float
     {
         $direct = $this->amountValue($data, [
-                'taxAmount',
-                'tax_amount',
-                'tax',
-                'gstAmount',
-                'gst_amount',
-                'gst',
-                'hst',
-                'pst',
-            ], ['tax', 'gst', 'hst', 'pst']);
+            'taxAmount',
+            'tax_amount',
+            'tax',
+            'gstAmount',
+            'gst_amount',
+            'gst',
+            'hst',
+            'pst',
+        ], ['tax', 'gst', 'hst', 'pst']);
         if ($direct !== null) {
             return $direct;
         }
@@ -241,8 +258,7 @@ class ReceiptController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $payload
-     *
+     * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
     private function analysisData(array $payload): array
@@ -265,8 +281,8 @@ class ReceiptController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $data
-     * @param array<int, string> $keys
+     * @param  array<string, mixed>  $data
+     * @param  array<int, string>  $keys
      */
     private function recursiveFirstValue(array $data, array $keys): mixed
     {
@@ -290,9 +306,9 @@ class ReceiptController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $data
-     * @param array<int, string> $keys
-     * @param array<int, string> $labels
+     * @param  array<string, mixed>  $data
+     * @param  array<int, string>  $keys
+     * @param  array<int, string>  $labels
      */
     private function amountValue(array $data, array $keys, array $labels): ?float
     {
@@ -328,8 +344,8 @@ class ReceiptController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $data
-     * @param array<int, string> $labels
+     * @param  array<string, mixed>  $data
+     * @param  array<int, string>  $labels
      */
     private function labeledAmount(array $data, array $labels): ?float
     {
@@ -343,7 +359,7 @@ class ReceiptController extends Controller
                 }
 
                 foreach ($labels as $label) {
-                    if (!preg_match('/\b' . preg_quote($label, '/') . '\b/i', $line)) {
+                    if (! preg_match('/\b'.preg_quote($label, '/').'\b/i', $line)) {
                         continue;
                     }
 
@@ -360,8 +376,7 @@ class ReceiptController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $data
-     *
+     * @param  array<string, mixed>  $data
      * @return array<int, string>
      */
     private function stringValues(array $data): array
@@ -382,7 +397,7 @@ class ReceiptController extends Controller
 
     private function cleanShortText(mixed $value, int $maxLength): ?string
     {
-        if (!is_string($value) && !is_numeric($value)) {
+        if (! is_string($value) && ! is_numeric($value)) {
             return null;
         }
 
@@ -396,7 +411,7 @@ class ReceiptController extends Controller
         }
 
         $text = preg_replace('/\s+/', ' ', $text);
-        if (!$text || strlen($text) > $maxLength) {
+        if (! $text || strlen($text) > $maxLength) {
             return null;
         }
 
@@ -406,7 +421,7 @@ class ReceiptController extends Controller
     private function cleanDescription(mixed $value): ?string
     {
         $text = $this->cleanShortText($value, 500);
-        if (!$text) {
+        if (! $text) {
             return null;
         }
 
@@ -424,11 +439,11 @@ class ReceiptController extends Controller
     private function cleanDate(mixed $value): ?string
     {
         $text = $this->cleanShortText($value, 40);
-        if (!$text) {
+        if (! $text) {
             return null;
         }
 
-        if (!preg_match('/\d{4}|\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}/', $text)) {
+        if (! preg_match('/\d{4}|\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}/', $text)) {
             return null;
         }
 

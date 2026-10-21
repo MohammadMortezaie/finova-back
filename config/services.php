@@ -40,6 +40,16 @@ return [
         'token' => env('FINANCIAL_MANAGEMENT_API_TOKEN'),
     ],
 
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+    ],
+
+    'telegram' => [
+        'bot_username' => env('TELEGRAM_BOT_USERNAME'),
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+    ],
+
     'stripe' => [
         'publishable' => env('STRIPE_PUBLISHABLE_KEY'),
         'secret' => env('STRIPE_SECRET'),

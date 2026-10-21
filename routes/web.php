@@ -2,12 +2,28 @@
 
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\ReceiptController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardUploadController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\StripeUpgradeController;
+use App\Http\Controllers\TelegramActivationController;
+use App\Http\Controllers\WebAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [WebAuthController::class, 'show'])->name('login');
+    Route::post('/login', [WebAuthController::class, 'login'])->middleware('throttle:10,1');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'show'])->name('dashboard');
+    Route::post('/dashboard/uploads', [DashboardUploadController::class, 'store'])->name('dashboard.uploads.store');
+    Route::post('/dashboard/telegram', [TelegramActivationController::class, 'store'])->name('dashboard.telegram.activate');
+    Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout');
 });
 
 Route::view('/privacy-policy', 'privacy-policy')->name('legal.privacy');
