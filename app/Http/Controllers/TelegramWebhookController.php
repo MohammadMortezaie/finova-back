@@ -20,7 +20,7 @@ class TelegramWebhookController extends Controller
         if ($update === []) {
             $update = $request->all();
         }
-        $bot->handleUpdate($update);
+        $bot->handleUpdate($update, $request->getSchemeAndHttpHost());
 
         return response()->noContent();
     }

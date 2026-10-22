@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Expense;
 use App\Models\User;
+use App\Services\TelegramBot;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -119,6 +120,37 @@ class TelegramBotTest extends TestCase
             '<b>👀 Reading your receipt…</b>',
             "<b>🧾 Expense saved</b>\n\n<b>Demo Store</b>\n\$11.20 · Meals\nSun 03 May 2026",
         ], $this->telegramMessages);
+    }
+
+    public function test_a_production_receipt_keeps_the_production_file_address(): void
+    {
+        config([
+            'services.telegram.bot_token' => 'test-token',
+            'services.financial_management.url' => 'https://demo.webpulse.ca/api/financial-management',
+            'services.financial_management.token' => 'test-token',
+        ]);
+        Storage::fake('public');
+        $user = User::factory()->create(['is_active' => true]);
+        $user->forceFill([
+            'telegram_chat_id' => '555',
+            'telegram_activated_at' => now(),
+        ])->save();
+        $this->fakeTelegram();
+
+        app(TelegramBot::class)->handleUpdate([
+            'update_id' => 3,
+            'message' => [
+                'message_id' => 12,
+                'chat' => ['id' => 555, 'type' => 'private'],
+                'photo' => [
+                    ['file_id' => 'large'],
+                ],
+            ],
+        ], 'https://finova.webpulse.ca');
+
+        $expense = Expense::query()->where('user_id', $user->id)->first();
+        $this->assertNotNull($expense);
+        $this->assertStringStartsWith('https://finova.webpulse.ca/receipt/file/', (string) $expense->receipt_uri);
     }
 
     private function fakeTelegram(): void

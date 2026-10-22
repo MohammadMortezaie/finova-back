@@ -12,6 +12,8 @@ use RuntimeException;
 
 class TelegramBot
 {
+    private ?string $publicBaseUrl = null;
+
     public function configured(): bool
     {
         return $this->token() !== '';
@@ -20,8 +22,9 @@ class TelegramBot
     /**
      * @param  array<string, mixed>  $update
      */
-    public function handleUpdate(array $update): void
+    public function handleUpdate(array $update, ?string $publicBaseUrl = null): void
     {
+        $this->publicBaseUrl = $publicBaseUrl;
         $message = $update['message'] ?? null;
         if (! is_array($message) || ($message['chat']['type'] ?? null) !== 'private') {
             return;
@@ -167,7 +170,8 @@ class TelegramBot
         $uploaded = new UploadedFile($temp, $this->safeFilename($filename), null, UPLOAD_ERR_OK, true);
 
         try {
-            $request = Request::create('/receipt/analyze', 'POST', [], [], ['file' => $uploaded]);
+            $analyzeUrl = ($this->publicBaseUrl ? rtrim($this->publicBaseUrl, '/') : '').'/receipt/analyze';
+            $request = Request::create($analyzeUrl, 'POST', [], [], ['file' => $uploaded]);
             $response = app(ReceiptController::class)->analyze($request);
         } finally {
             @unlink($temp);

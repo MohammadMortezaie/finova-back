@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ReceiptController;
 use App\Models\Expense;
 use App\Models\Income;
 use App\Models\User;
+use App\Support\PublicStorageUrl;
 use App\Support\UserProfileHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -86,7 +87,7 @@ class DashboardUploadController extends Controller
                     'amount' => self::money(abs((float) $expense->total_amount), $currency),
                     'date' => $expense->date?->format('D d M Y') ?? '',
                     'detail' => self::label((string) ($expense->category_id ?: 'Expense')),
-                    'fileUrl' => $expense->receipt_uri,
+                    'fileUrl' => PublicStorageUrl::absolute(request(), $expense->receipt_uri),
                     'sort' => ($expense->created_at?->timestamp ?? 0).sprintf('%06d', $expense->id),
                 ];
             });
@@ -104,7 +105,7 @@ class DashboardUploadController extends Controller
                     'amount' => self::money(abs((float) $income->amount), $currency),
                     'date' => $income->date?->format('D d M Y') ?? '',
                     'detail' => 'Income',
-                    'fileUrl' => self::fileUrl((string) $income->note),
+                    'fileUrl' => PublicStorageUrl::absolute(request(), self::fileUrl((string) $income->note)),
                     'sort' => ($income->created_at?->timestamp ?? 0).sprintf('%06d', $income->id),
                 ];
             });

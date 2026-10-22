@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class WebDashboardTest extends TestCase
@@ -18,6 +19,29 @@ class WebDashboardTest extends TestCase
     {
         Carbon::setTestNow();
         parent::tearDown();
+    }
+
+    public function test_view_file_icon_uses_the_site_you_are_on(): void
+    {
+        $user = User::factory()->create([
+            'is_active' => true,
+        ]);
+        Expense::query()->create([
+            'user_id' => $user->id,
+            'vendor_name' => 'Cafe',
+            'total_amount' => -5,
+            'date' => '2026-10-01',
+            'receipt_uri' => 'http://localhost:8000/receipt/file/receipts/cafe.jpg',
+        ]);
+
+        config(['app.url' => 'https://finova.webpulse.ca']);
+        URL::forceRootUrl('https://finova.webpulse.ca');
+
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('http://finova.webpulse.ca/receipt/file/receipts/cafe.jpg', false)
+            ->assertDontSee('http://localhost:8000/receipt/file/receipts/cafe.jpg', false);
     }
 
     public function test_login_page_is_available_and_dashboard_requires_auth(): void
