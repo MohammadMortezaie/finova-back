@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Mail\VerificationCodeMail;
 use App\Models\User;
 use App\Support\UserProfileHelper;
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ class AuthController extends Controller
         ]);
 
         $name = $data['name'] ?? $data['fullname'] ?? null;
-        if (!$name) {
+        if (! $name) {
             return response()->json([
                 'message' => 'Name is required.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -54,7 +55,7 @@ class AuthController extends Controller
         $user = UserProfileHelper::syncIncomeExpenseTotals($user) ?? $user;
 
         try {
-            $this->sendVerificationEmail($user, $code);
+            Mail::to($user->email, $user->name)->send(new VerificationCodeMail($user, $code));
         } catch (Throwable $e) {
             Log::warning('Registration verification email failed.', [
                 'user_id' => $user->id,
@@ -81,7 +82,7 @@ class AuthController extends Controller
 
         $user = User::query()->where('email', $data['email'])->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'message' => 'Invalid verification code.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -99,9 +100,9 @@ class AuthController extends Controller
         }
 
         if (
-            !$user->email_verification_code ||
-            !hash_equals($user->email_verification_code, $data['code']) ||
-            !$user->email_verification_expires_at ||
+            ! $user->email_verification_code ||
+            ! hash_equals($user->email_verification_code, $data['code']) ||
+            ! $user->email_verification_expires_at ||
             $user->email_verification_expires_at->isPast()
         ) {
             return response()->json([
@@ -131,7 +132,7 @@ class AuthController extends Controller
         ]);
 
         $user = User::query()->where('email', $data['email'])->first();
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'message' => 'Account not found.',
             ], Response::HTTP_NOT_FOUND);
@@ -151,7 +152,7 @@ class AuthController extends Controller
         $user->save();
 
         try {
-            $this->sendVerificationEmail($user, $code);
+            Mail::to($user->email, $user->name)->send(new VerificationCodeMail($user, $code));
         } catch (Throwable $e) {
             Log::warning('Verification email resend failed.', [
                 'user_id' => $user->id,
@@ -180,20 +181,20 @@ class AuthController extends Controller
 
         $user = User::query()->where('email', $data['email'])->first();
 
-        if (!$user || !Hash::check($data['password'], $user->password)) {
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
             return response()->json([
                 'message' => 'Invalid email or password.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        if (!$user->email_verified_at && $user->email_verification_code) {
+        if (! $user->email_verified_at && $user->email_verification_code) {
             return response()->json([
                 'message' => 'Please verify your email before logging in.',
                 'pendingVerification' => true,
             ], Response::HTTP_FORBIDDEN);
         }
 
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             return response()->json([
                 'message' => 'This account is inactive.',
             ], Response::HTTP_FORBIDDEN);
@@ -206,52 +207,5 @@ class AuthController extends Controller
                 'user' => (new UserResource($user))->resolve(),
             ],
         ]);
-    }
-
-    private function sendVerificationEmail(User $user, string $code): void
-    {
-        $escapedName = e($user->name);
-        $escapedCode = e($code);
-
-        $html = <<<HTML
-<!doctype html>
-<html>
-<head>
-  <title>Finova verification code</title>
-</head>
-<body style="margin:0;padding:0;background:#f4f7f6;font-family:Arial,Helvetica,sans-serif;color:#1c2520;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7f6;padding:32px 16px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #dfe7e2;">
-          <tr>
-            <td style="padding:28px 28px 18px;background:#111814;color:#ffffff;">
-              <div style="font-size:14px;color:#73d99f;font-weight:700;letter-spacing:.4px;">FINOVA</div>
-              <h1 style="margin:10px 0 0;font-size:26px;line-height:32px;font-weight:800;">Verify your email</h1>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:28px;">
-              <p style="margin:0 0 14px;font-size:16px;line-height:24px;">Hi {$escapedName},</p>
-              <p style="margin:0 0 22px;font-size:16px;line-height:24px;color:#526158;">Use this 6-digit code to finish creating your account.</p>
-              <div style="text-align:center;margin:26px 0;">
-                <div style="display:inline-block;padding:18px 28px;border-radius:14px;background:#eefaf2;border:1px solid #bce9ca;color:#111814;font-size:34px;font-weight:800;letter-spacing:8px;">{$escapedCode}</div>
-              </div>
-              <p style="margin:0;font-size:14px;line-height:22px;color:#6a766f;">This code expires in 15 minutes. If you did not request it, you can ignore this email.</p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-HTML;
-
-        Mail::html($html, function ($message) use ($user) {
-            $message
-                ->to($user->email, $user->name)
-                ->subject('Your Finova verification code');
-        });
     }
 }

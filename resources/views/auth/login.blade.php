@@ -82,15 +82,28 @@
         font-weight: 800;
     }
     button[type="submit"]:hover { filter: brightness(1.05); }
-    .error {
+    .error, .status {
         margin-bottom: 16px;
         padding: 12px 14px;
         border-radius: 14px;
+        font-size: 14px;
+    }
+    .error {
         background: rgba(255, 120, 120, .12);
         border: 1px solid rgba(255, 140, 140, .35);
         color: #ffc1c1;
-        font-size: 14px;
     }
+    .status {
+        background: rgba(198, 227, 90, .12);
+        border: 1px solid rgba(198, 227, 90, .35);
+        color: #e7f6bf;
+    }
+    .switch {
+        margin: 18px 0 0;
+        color: rgba(244, 247, 242, .72);
+        text-align: center;
+    }
+    .switch a { color: #d6f27a; font-weight: 700; text-decoration: none; }
 </style>
 @endsection
 
@@ -102,6 +115,9 @@
         </a>
         <h1>Welcome back</h1>
         <p class="lead">Log in to see your savings, spending, and upcoming bills.</p>
+        @if (session('status'))
+            <div class="status">{{ session('status') }}</div>
+        @endif
         @if ($errors->any())
             <div class="error">{{ $errors->first() }}</div>
         @endif
@@ -120,5 +136,6 @@
             </div>
             <button type="submit">Log in</button>
         </form>
+        <p class="switch">New to Finova? <a href="{{ route('register') }}">Create an account</a></p>
     </div>
 @endsection

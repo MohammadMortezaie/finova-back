@@ -8,6 +8,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\StripeUpgradeController;
 use App\Http\Controllers\TelegramActivationController;
 use App\Http\Controllers\WebAuthController;
+use App\Http\Controllers\WebRegisterController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,6 +18,11 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [WebAuthController::class, 'show'])->name('login');
     Route::post('/login', [WebAuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::get('/register', [WebRegisterController::class, 'show'])->name('register');
+    Route::post('/register', [WebRegisterController::class, 'store'])->middleware('throttle:10,1');
+    Route::get('/register/verify', [WebRegisterController::class, 'showVerify'])->name('register.verify');
+    Route::post('/register/verify', [WebRegisterController::class, 'verify'])->middleware('throttle:10,1');
+    Route::post('/register/verify/resend', [WebRegisterController::class, 'resend'])->middleware('throttle:5,1')->name('register.verify.resend');
 });
 
 Route::middleware('auth')->group(function () {
