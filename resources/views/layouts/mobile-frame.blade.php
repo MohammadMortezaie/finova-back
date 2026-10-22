@@ -3,13 +3,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>@yield('title', 'Money Management')</title>
+    <title>@yield('title', 'Finova')</title>
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/money-management-icon.png') }}">
     <meta name="theme-color" content="#10291c">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Money Management">
+    <meta name="apple-mobile-web-app-title" content="Finova">
     <style>
         :root { color-scheme: dark; }
         * { box-sizing: border-box; }

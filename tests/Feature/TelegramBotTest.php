@@ -37,7 +37,10 @@ class TelegramBotTest extends TestCase
     public function test_start_command_connects_the_chat(): void
     {
         config(['services.telegram.bot_token' => 'test-token']);
-        $user = User::factory()->create(['is_active' => true]);
+        $user = User::factory()->create([
+            'name' => 'John Snow',
+            'is_active' => true,
+        ]);
         $user->forceFill([
             'telegram_activation_requested_at' => now(),
             'telegram_link_token' => 'link-token',
@@ -57,7 +60,9 @@ class TelegramBotTest extends TestCase
         $this->assertSame('555', $user->telegram_chat_id);
         $this->assertNotNull($user->telegram_activated_at);
         $this->assertNull($user->telegram_link_token);
-        $this->assertSame(['Connected. Send a receipt photo or file and I will add it to your records.'], $this->telegramMessages);
+        $this->assertSame([
+            "<b>✅ You're connected</b>\n\nWelcome, <b>John</b>.\nThis chat is now your receipt inbox.\n\n<blockquote>Send a photo or PDF anytime. I'll read the store, date, and amount, then add it to your records.</blockquote>",
+        ], $this->telegramMessages);
     }
 
     public function test_webhook_rejects_a_missing_secret(): void
@@ -110,7 +115,10 @@ class TelegramBotTest extends TestCase
         $this->assertNotNull($expense);
         $this->assertSame('Demo Store', $expense->vendor_name);
         $this->assertSame(-11.2, $expense->total_amount);
-        $this->assertSame(['Reading that receipt…', 'Saved Expense: Demo Store, $11.20.'], $this->telegramMessages);
+        $this->assertSame([
+            '<b>👀 Reading your receipt…</b>',
+            "<b>🧾 Expense saved</b>\n\n<b>Demo Store</b>\n\$11.20 · Meals\nSun 03 May 2026",
+        ], $this->telegramMessages);
     }
 
     private function fakeTelegram(): void

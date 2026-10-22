@@ -1,6 +1,6 @@
 @extends('layouts.mobile-frame')
 
-@section('title', 'Log in | Money Management')
+@section('title', 'Log in | Finova')
 
 @section('styles')
 <style>
@@ -98,7 +98,7 @@
     <div class="login">
         <a class="brand" href="{{ url('/') }}">
             <img src="{{ asset('images/money-management-icon.png') }}" alt="">
-            <span>Money Management</span>
+            <span>Finova</span>
         </a>
         <h1>Welcome back</h1>
         <p class="lead">Log in to see your savings, spending, and upcoming bills.</p>

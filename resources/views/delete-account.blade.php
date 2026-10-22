@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Delete Account | Money Management</title>
+    <title>Delete Account | Finova</title>
     <style>
         :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; --bg:#121212; --panel:#212121; --muted:#b3b3b3; --text:#f5f5f5; --accent:#1db954; --border:rgba(179,179,179,.18); }
         * { box-sizing: border-box; }
@@ -22,14 +22,14 @@
         <h1>Delete Account</h1>
         <p class="meta">Effective date: May 8, 2026</p>
 
-        <p class="notice">This page explains how Money Management users can request deletion of their account and associated app data.</p>
+        <p class="notice">This page explains how Finova users can request deletion of their account and associated app data.</p>
 
         <h2>How to Request Account Deletion</h2>
-        <p>To request deletion of your Money Management account, email <a href="mailto:info@webpulse.ca">info@webpulse.ca</a> and include the email address associated with your account.</p>
+        <p>To request deletion of your Finova account, email <a href="mailto:info@webpulse.ca">info@webpulse.ca</a> and include the email address associated with your account.</p>
         <p>For security, we may ask you to verify ownership of the account before deletion is completed.</p>
 
         <h2>What We Delete</h2>
-        <p>After your deletion request is verified, we will delete or anonymize account data associated with your Money Management account, including:</p>
+        <p>After your deletion request is verified, we will delete or anonymize account data associated with your Finova account, including:</p>
         <ul>
             <li>Account profile information, such as name, email address, language, and currency preferences.</li>
             <li>Expense records, income records, subscription records, and app settings.</li>
@@ -48,7 +48,7 @@
         <p>If you want to delete individual expenses, income records, subscriptions, or receipt records without deleting your account, use the controls available inside the app where provided. If a specific record cannot be deleted in the app, email <a href="mailto:info@webpulse.ca">info@webpulse.ca</a> with your request.</p>
 
         <h2>Before You Delete</h2>
-        <p>Account deletion may be permanent. You are responsible for exporting or saving any information you want to keep before requesting deletion. Money Management is not responsible for data that is deleted or becomes unavailable after an account deletion request is processed.</p>
+        <p>Account deletion may be permanent. You are responsible for exporting or saving any information you want to keep before requesting deletion. Finova is not responsible for data that is deleted or becomes unavailable after an account deletion request is processed.</p>
 
         <p><a href="{{ route('legal.privacy') }}">View Privacy Policy</a> · <a href="{{ route('legal.terms') }}">View Terms & Conditions</a></p>
     </main>

@@ -1,6 +1,6 @@
 @extends('layouts.mobile-frame')
 
-@section('title', 'Dashboard | Money Management')
+@section('title', 'Dashboard | Finova')
 
 @section('styles')
 <style>
@@ -683,7 +683,7 @@
         <div class="shortcut" data-shortcut hidden>
             <div class="shortcut-card" role="dialog" aria-modal="true" aria-labelledby="shortcut-title">
                 <h2 id="shortcut-title">Add a shortcut?</h2>
-                <p data-shortcut-copy>Add Money Management to your phone so you can open it like an app.</p>
+                <p data-shortcut-copy>Add Finova to your phone so you can open it like an app.</p>
                 <div class="shortcut-actions" data-shortcut-actions>
                     <button class="shortcut-no" type="button" data-shortcut-no>Not now</button>
                     <button class="shortcut-yes" type="button" data-shortcut-yes>Yes</button>

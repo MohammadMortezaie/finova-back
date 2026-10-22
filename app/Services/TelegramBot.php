@@ -48,8 +48,8 @@ class TelegramBot
 
         if ($text !== '') {
             $this->send($chatId, $this->linkedUser($chatId)
-                ? 'Send a photo or file of a receipt and I will add it to your records.'
-                : 'Open Money Management, tap Activate bot, then tap Start from that Telegram link.');
+                ? $this->receiptPrompt()
+                : $this->connectPrompt());
         }
     }
 
@@ -78,8 +78,8 @@ class TelegramBot
         $token = trim($token);
         if ($token === '') {
             $this->send($chatId, $this->linkedUser($chatId)
-                ? 'This chat is already connected. Send a receipt photo or file.'
-                : 'Open Money Management, tap Activate bot, then tap Start from that Telegram link.');
+                ? $this->alreadyConnected()
+                : $this->connectPrompt());
 
             return;
         }
@@ -87,8 +87,8 @@ class TelegramBot
         $user = User::query()->where('telegram_link_token', $token)->first();
         if (! $user) {
             $this->send($chatId, $this->linkedUser($chatId)
-                ? 'This chat is already connected. Send a receipt photo or file.'
-                : 'That activation link is no longer valid. Tap Activate bot in the app and try again.');
+                ? $this->alreadyConnected()
+                : $this->expiredLink());
 
             return;
         }
@@ -110,29 +110,31 @@ class TelegramBot
             'telegram_link_token' => null,
         ])->save();
 
-        $this->send($chatId, 'Connected. Send a receipt photo or file and I will add it to your records.');
+        $this->send($chatId, $this->connectedMessage($user));
     }
 
     private function saveReceipt(string $chatId, string $fileId, string $filename): void
     {
         $user = $this->linkedUser($chatId);
         if (! $user) {
-            $this->send($chatId, 'Open Money Management, tap Activate bot, then tap Start from that Telegram link.');
+            $this->send($chatId, $this->connectPrompt());
 
             return;
         }
 
-        $this->send($chatId, 'Reading that receipt…');
+        $this->send($chatId, '<b>👀 Reading your receipt…</b>');
 
         try {
             $saved = $this->recordDownloadedFile($user, $fileId, $filename);
-        } catch (RuntimeException) {
-            $this->send($chatId, 'I could not read that file. Try a clearer photo of the receipt.');
+        } catch (RuntimeException $exception) {
+            $this->send($chatId, str_contains($exception->getMessage(), '20 MB')
+                ? $this->fileTooLarge()
+                : $this->couldNotRead());
 
             return;
         }
 
-        $this->send($chatId, "Saved {$saved['kind']}: {$saved['title']}, {$saved['amount']}.");
+        $this->send($chatId, $this->savedMessage($saved));
     }
 
     /**
@@ -214,12 +216,106 @@ class TelegramBot
             ->first();
     }
 
+    private function connectedMessage(User $user): string
+    {
+        $name = preg_split('/\s+/', trim((string) $user->name)) ?: [];
+        $first = $this->escape((string) ($name[0] ?? ''));
+        $welcome = $first === '' ? 'Your account is linked.' : "Welcome, <b>{$first}</b>.";
+
+        return implode("\n", [
+            '<b>✅ You\'re connected</b>',
+            '',
+            $welcome,
+            'This chat is now your receipt inbox.',
+            '',
+            '<blockquote>Send a photo or PDF anytime. I\'ll read the store, date, and amount, then add it to your records.</blockquote>',
+        ]);
+    }
+
+    private function alreadyConnected(): string
+    {
+        return implode("\n", [
+            '<b>✅ Already connected</b>',
+            '',
+            '<blockquote>Send a receipt photo or PDF whenever you are ready.</blockquote>',
+        ]);
+    }
+
+    private function connectPrompt(): string
+    {
+        return implode("\n", [
+            '<b>🔗 Connect your account</b>',
+            '',
+            'Open <b>Finova</b>, tap <b>Activate bot</b>, then tap <b>Start</b> from that link.',
+        ]);
+    }
+
+    private function expiredLink(): string
+    {
+        return implode("\n", [
+            '<b>⏳ This link has expired</b>',
+            '',
+            'Open <b>Finova</b> and tap <b>Activate bot</b> for a fresh link.',
+        ]);
+    }
+
+    private function receiptPrompt(): string
+    {
+        return implode("\n", [
+            '<b>📎 Send a receipt</b>',
+            '',
+            'A photo or PDF is enough. I\'ll add the amount to your records.',
+        ]);
+    }
+
+    private function fileTooLarge(): string
+    {
+        return implode("\n", [
+            '<b>📎 That file is too large</b>',
+            '',
+            'Send a photo or PDF under <b>20 MB</b>.',
+        ]);
+    }
+
+    private function couldNotRead(): string
+    {
+        return implode("\n", [
+            '<b>📷 I couldn\'t read that file</b>',
+            '',
+            'Try a clearer photo, with the store name and total visible.',
+        ]);
+    }
+
+    /**
+     * @param  array{kind: string, title: string, amount: string, date: string, detail: string, fileUrl: ?string}  $saved
+     */
+    private function savedMessage(array $saved): string
+    {
+        $income = $saved['kind'] === 'Income';
+        $icon = $income ? '💚' : '🧾';
+        $label = $income ? 'Income saved' : 'Expense saved';
+
+        return implode("\n", [
+            "<b>{$icon} {$label}</b>",
+            '',
+            '<b>'.$this->escape($saved['title']).'</b>',
+            $this->escape($saved['amount']).' · '.$this->escape($saved['detail']),
+            $this->escape($saved['date']),
+        ]);
+    }
+
+    private function escape(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+
     private function send(string $chatId, string $text): void
     {
         try {
             $this->call('sendMessage', [
                 'chat_id' => $chatId,
                 'text' => $text,
+                'parse_mode' => 'HTML',
             ]);
         } catch (RuntimeException) {
             // The account change is already saved. The next message can try the reply again.

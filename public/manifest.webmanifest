@@ -1,7 +1,7 @@
 {
     "id": "/",
-    "name": "Money Management",
-    "short_name": "Money",
+    "name": "Finova",
+    "short_name": "Finova",
     "start_url": "/dashboard",
     "scope": "/",
     "display": "standalone",

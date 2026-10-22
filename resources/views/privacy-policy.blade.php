@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Privacy Policy | Money Management</title>
+    <title>Privacy Policy | Finova</title>
     <style>
         :root { color-scheme: dark; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; --bg:#121212; --panel:#212121; --muted:#b3b3b3; --text:#f5f5f5; --accent:#1db954; --border:rgba(179,179,179,.18); }
         * { box-sizing: border-box; }
@@ -22,7 +22,7 @@
         <h1>Privacy Policy</h1>
         <p class="meta">Effective date: May 8, 2026</p>
 
-        <p class="notice">This Privacy Policy explains how Money Management collects, uses, stores, and protects information when you use our mobile app and related services.</p>
+        <p class="notice">This Privacy Policy explains how Finova collects, uses, stores, and protects information when you use our mobile app and related services.</p>
 
         <h2>1. Information We Collect</h2>
         <p>We collect information you provide directly, including your name, email address, password credentials, language and currency preferences, expenses, income records, subscriptions, receipt images, and account settings.</p>
@@ -50,7 +50,7 @@
         <p>We use reasonable technical and organizational measures to protect your information. However, no system can be guaranteed to be completely secure, uninterrupted, or error-free.</p>
 
         <h2>7. Data Loss and Backups</h2>
-        <p>You are responsible for maintaining your own backups of important financial records, receipts, exports, and account information. To the maximum extent permitted by law, Money Management, Webpulse, and their owners, employees, contractors, and service providers are not responsible or liable for lost, corrupted, deleted, delayed, unavailable, or unrecoverable data, whether caused by user action, device failure, network issues, software defects, server failure, third-party services, unauthorized access, or any other cause.</p>
+        <p>You are responsible for maintaining your own backups of important financial records, receipts, exports, and account information. To the maximum extent permitted by law, Finova, Webpulse, and their owners, employees, contractors, and service providers are not responsible or liable for lost, corrupted, deleted, delayed, unavailable, or unrecoverable data, whether caused by user action, device failure, network issues, software defects, server failure, third-party services, unauthorized access, or any other cause.</p>
 
         <h2>8. Your Choices</h2>
         <p>You can choose not to grant camera or photo permissions, but receipt photo features may not work. You may update certain account preferences in the app. You may contact us at <a href="mailto:info@webpulse.ca">info@webpulse.ca</a> to request access, correction, or deletion of personal information, subject to legal, security, and operational requirements.</p>
@@ -60,7 +60,7 @@
         <p>We retain information for as long as needed to provide the app, comply with legal obligations, resolve disputes, enforce agreements, and maintain security. Deleted data may remain in backups or logs for a limited period.</p>
 
         <h2>10. Children</h2>
-        <p>Money Management is not intended for children under 13. We do not knowingly collect personal information from children under 13.</p>
+        <p>Finova is not intended for children under 13. We do not knowingly collect personal information from children under 13.</p>
 
         <h2>11. International Processing</h2>
         <p>Your information may be processed and stored in countries other than where you live. Those countries may have different privacy laws.</p>

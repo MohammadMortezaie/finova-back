@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Money Management | Personal Finance Tracker</title>
-    <meta name="description" content="Money Management helps you track expenses, income, subscriptions, receipts, and budgets in one private finance app.">
+    <title>Finova | Personal Finance Tracker</title>
+    <meta name="description" content="Finova helps you track expenses, income, subscriptions, receipts, and budgets in one private finance app.">
     <style>
         :root {
             color-scheme: dark;
@@ -617,8 +617,8 @@
     <header>
         <nav class="wrap" aria-label="Primary navigation">
             <a class="brand" href="{{ url('/') }}">
-                <img src="{{ asset('images/money-management-icon.png') }}" alt="Money Management app icon">
-                <span>Money Management</span>
+                <img src="{{ asset('images/money-management-icon.png') }}" alt="Finova app icon">
+                <span>Finova</span>
             </a>
             <div class="nav-links">
                 <a href="#features">Features</a>
@@ -639,7 +639,7 @@
             <div class="wrap hero">
                 <div>
                     <div class="eyebrow">Expense, income, receipt, and subscription tracking</div>
-                    <h1>Money Management</h1>
+                    <h1>Finova</h1>
                     <p class="lead">A private finance app for organizing daily spending, income, subscriptions, and receipt records without turning your personal budget into a spreadsheet project.</p>
                     <div class="hero-actions">
                         <a class="button" href="mailto:info@webpulse.ca">Contact support</a>
@@ -648,7 +648,7 @@
                 </div>
 
                 <div class="stage">
-                    <div class="phone" aria-label="Money Management app preview">
+                    <div class="phone" aria-label="Finova app preview">
                         <div class="screen">
                             <div class="screen-head">
                                 <div class="screen-title">
@@ -701,7 +701,7 @@
             <div class="wrap">
                 <div class="section-head">
                     <h2>Built for everyday personal finance</h2>
-                    <p class="section-copy">Money Management keeps the core workflow simple: record what came in, what went out, what is renewing soon, and where your receipt proof lives.</p>
+                    <p class="section-copy">Finova keeps the core workflow simple: record what came in, what went out, what is renewing soon, and where your receipt proof lives.</p>
                 </div>
 
                 <div class="features">
@@ -777,7 +777,7 @@
                 <div class="privacy-band">
                     <div>
                         <h2>Your account, your records</h2>
-                        <p>Money Management stores personal finance information so the app can provide budgeting, receipt, subscription, and account features. You can request account deletion or contact support at info@webpulse.ca.</p>
+                        <p>Finova stores personal finance information so the app can provide budgeting, receipt, subscription, and account features. You can request account deletion or contact support at info@webpulse.ca.</p>
                     </div>
                     <div class="hero-actions">
                         <a class="button" href="{{ route('legal.delete-account') }}">Delete account info</a>
@@ -790,7 +790,7 @@
 
     <footer>
         <div class="wrap footer-inner">
-            <span>&copy; {{ date('Y') }} Money Management by Webpulse.</span>
+            <span>&copy; {{ date('Y') }} Finova by Webpulse.</span>
             <div class="footer-links">
                 <a href="{{ route('legal.privacy') }}">Privacy Policy</a>
                 <a href="{{ route('legal.terms') }}">Terms & Conditions</a>
