@@ -32,5 +32,8 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="OPENAI_API_KEY" value=""/>
+        <env name="TELEGRAM_BOT_USERNAME" value=""/>
+        <env name="TELEGRAM_BOT_TOKEN" value=""/>
+        <env name="TELEGRAM_WEBHOOK_SECRET" value=""/>
     </php>
 </phpunit>

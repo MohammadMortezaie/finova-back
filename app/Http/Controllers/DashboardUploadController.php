@@ -38,12 +38,7 @@ class DashboardUploadController extends Controller
             ]);
         }
 
-        $user = $request->user();
-        $saved = $this->isIncome($analysis)
-            ? $this->saveIncome($user, $analysis)
-            : $this->saveExpense($user, $analysis);
-
-        UserProfileHelper::syncIncomeExpenseTotals($user);
+        $saved = $this->recordAnalysis($request->user(), $analysis);
 
         return redirect()
             ->route('dashboard')
@@ -123,6 +118,21 @@ class DashboardUploadController extends Controller
         }, $rows);
 
         return $limit === null ? $rows : array_slice($rows, 0, $limit);
+    }
+
+    /**
+     * @param  array<string, mixed>  $analysis
+     * @return array{kind: string, title: string, amount: string, date: string, detail: string, fileUrl: ?string}
+     */
+    public function recordAnalysis(User $user, array $analysis): array
+    {
+        $saved = $this->isIncome($analysis)
+            ? $this->saveIncome($user, $analysis)
+            : $this->saveExpense($user, $analysis);
+
+        UserProfileHelper::syncIncomeExpenseTotals($user);
+
+        return $saved;
     }
 
     /**

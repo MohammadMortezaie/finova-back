@@ -636,7 +636,7 @@
                     @if ($telegramStatus === 'activated')
                         <p>Connected {{ $user->telegram_activated_at->format('M j, Y') }}.</p>
                     @elseif ($telegramStatus === 'pending')
-                        <p>{{ session('telegram_notice', 'Activation is saved. The Telegram link will show here once the bot is connected.') }}</p>
+                        <p>{{ filled(config('services.telegram.bot_username')) ? 'Open Telegram and tap Start to finish connecting this account.' : session('telegram_notice', 'Activation is saved. The Telegram link will show here once the bot is connected.') }}</p>
                     @else
                         <p>Activate the bot to send receipts from Telegram.</p>
                     @endif
