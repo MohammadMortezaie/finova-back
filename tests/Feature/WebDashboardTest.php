@@ -22,7 +22,11 @@ class WebDashboardTest extends TestCase
 
     public function test_login_page_is_available_and_dashboard_requires_auth(): void
     {
-        $this->get('/login')->assertOk()->assertSee('Welcome back');
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('Welcome back')
+            ->assertSee('class="motion"', false)
+            ->assertSee('class="motion motion-right"', false);
         $this->get('/dashboard')->assertRedirect('/login');
     }
 
@@ -75,6 +79,7 @@ class WebDashboardTest extends TestCase
         $this->get('/dashboard')
             ->assertOk()
             ->assertSee('John Snow')
+            ->assertSee('Add a shortcut?')
             ->assertSee('Upload file')
             ->assertSee('Financial records history')
             ->assertSee('Salary')

@@ -46,7 +46,9 @@ class WebAuthController extends Controller
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()
+            ->intended(route('dashboard'))
+            ->with('offer_shortcut', true);
     }
 
     public function logout(Request $request): RedirectResponse

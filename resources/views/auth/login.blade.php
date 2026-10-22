@@ -6,11 +6,14 @@
 <style>
     .login {
         flex: 1;
+        min-height: 0;
         overflow: auto;
+        overscroll-behavior: contain;
         display: flex;
         flex-direction: column;
         justify-content: center;
         padding: 36px 24px 32px;
+        -webkit-overflow-scrolling: touch;
     }
     .brand {
         display: flex;

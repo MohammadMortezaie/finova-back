@@ -2,106 +2,17 @@
 
 @section('title', 'Dashboard | Money Management')
 
-@section('body-class', 'is-dashboard')
-
 @section('styles')
 <style>
-    body.is-dashboard {
-        background:
-            radial-gradient(125% 36% at 50% -8%, rgba(214, 226, 96, .55), transparent 46%),
-            radial-gradient(90% 28% at 50% 0%, rgba(52, 122, 68, .85), transparent 62%),
-            linear-gradient(180deg, #1c4a32 0%, #10291c 34%, #07140e 100%);
-    }
-    body.is-dashboard .app { background: transparent; }
-    @media (min-width: 721px) {
-        body.is-dashboard .shell { padding: 16px 0; }
-        body.is-dashboard .app {
-            height: calc(100vh - 32px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, .38);
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .02) 18%, transparent 42%);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, .55),
-                inset 0 0 0 1px rgba(255, 255, 255, .08),
-                0 0 0 1px rgba(214, 242, 122, .14),
-                0 18px 50px rgba(0, 0, 0, .22);
-        }
-        body.is-dashboard .side {
-            position: relative;
-            overflow: hidden;
-        }
-    }
-    .motion {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-    }
-    .glow, .ring, .beam { position: absolute; display: block; }
-    .glow {
-        border-radius: 50%;
-        filter: blur(2px);
-        opacity: .75;
-    }
-    .glow-1 {
-        width: 180px;
-        height: 180px;
-        background: radial-gradient(circle, rgba(214, 242, 122, .55), rgba(214, 242, 122, 0) 68%);
-        top: 12%;
-        left: 18%;
-        animation: drift 16s ease-in-out infinite alternate;
-    }
-    .glow-2 {
-        width: 140px;
-        height: 140px;
-        background: radial-gradient(circle, rgba(126, 208, 106, .4), rgba(126, 208, 106, 0) 70%);
-        bottom: 18%;
-        right: 12%;
-        animation: drift 22s ease-in-out infinite alternate-reverse;
-    }
-    .ring {
-        width: 220px;
-        height: 220px;
-        border-radius: 50%;
-        border: 1px solid rgba(255, 255, 255, .22);
-        box-shadow: inset 0 0 24px rgba(214, 242, 122, .12), 0 0 30px rgba(214, 242, 122, .08);
-        top: 38%;
-        left: 50%;
-        animation: spin 28s linear infinite;
-    }
-    .beam {
-        width: 1px;
-        height: 42%;
-        background: linear-gradient(180deg, transparent, rgba(255, 255, 255, .55), transparent);
-        left: 62%;
-        animation: sweep 11s ease-in-out infinite;
-    }
-    .motion-right .glow-1 { animation-duration: 19s; left: auto; right: 16%; }
-    .motion-right .glow-2 { animation-duration: 24s; right: auto; left: 10%; }
-    .motion-right .ring { animation-duration: 34s; animation-direction: reverse; }
-    .motion-right .beam { left: 34%; animation-delay: -4s; }
-    @keyframes drift {
-        from { transform: translate3d(0, 0, 0) scale(1); }
-        to { transform: translate3d(28px, -36px, 0) scale(1.12); }
-    }
-    @keyframes spin {
-        from { transform: translateX(-50%) rotate(0deg); }
-        to { transform: translateX(-50%) rotate(360deg); }
-    }
-    @keyframes sweep {
-        0% { top: -20%; opacity: 0; }
-        20% { opacity: 1; }
-        80% { opacity: 1; }
-        100% { top: 88%; opacity: 0; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-        .glow, .ring, .beam { animation: none; }
-    }
+    .headers, .tabbar { flex: none; }
     .headers, .screens { min-width: 0; }
     .screens {
         flex: 1;
+        min-height: 0;
         overflow: auto;
+        overscroll-behavior: contain;
         padding: 4px 18px 22px;
+        -webkit-overflow-scrolling: touch;
     }
     .top {
         display: none;
@@ -431,6 +342,35 @@
     }
     .back-link { margin: 0 0 12px; }
     .history-link { margin-top: 12px; }
+    .shortcut {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        display: grid;
+        place-items: end center;
+        padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
+        background: rgba(0, 0, 0, .5);
+    }
+    .shortcut[hidden] { display: none; }
+    .shortcut-card {
+        width: min(100%, 360px);
+        padding: 18px;
+        border-radius: 22px;
+        background: #163526;
+        border: 1px solid rgba(255, 255, 255, .16);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, .28);
+    }
+    .shortcut-card h2 { margin: 0; font-size: 22px; letter-spacing: -.03em; }
+    .shortcut-card p { margin: 8px 0 0; color: rgba(244, 247, 242, .74); line-height: 1.45; }
+    .shortcut-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .shortcut-actions button {
+        border: 0;
+        border-radius: 14px;
+        padding: 13px 12px;
+        font-weight: 800;
+    }
+    .shortcut-no { background: rgba(255, 255, 255, .1); color: #fff; }
+    .shortcut-yes { background: #d6f27a; color: #10210e; }
     .tabbar {
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -739,24 +679,18 @@
             <span>Profile</span>
         </button>
     </nav>
-@endsection
-
-@section('side-left')
-    <div class="motion" aria-hidden="true">
-        <span class="glow glow-1"></span>
-        <span class="glow glow-2"></span>
-        <span class="ring"></span>
-        <span class="beam"></span>
-    </div>
-@endsection
-
-@section('side-right')
-    <div class="motion motion-right" aria-hidden="true">
-        <span class="glow glow-1"></span>
-        <span class="glow glow-2"></span>
-        <span class="ring"></span>
-        <span class="beam"></span>
-    </div>
+    @if (session('offer_shortcut'))
+        <div class="shortcut" data-shortcut hidden>
+            <div class="shortcut-card" role="dialog" aria-modal="true" aria-labelledby="shortcut-title">
+                <h2 id="shortcut-title">Add a shortcut?</h2>
+                <p data-shortcut-copy>Add Money Management to your phone so you can open it like an app.</p>
+                <div class="shortcut-actions" data-shortcut-actions>
+                    <button class="shortcut-no" type="button" data-shortcut-no>Not now</button>
+                    <button class="shortcut-yes" type="button" data-shortcut-yes>Yes</button>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @section('scripts')
@@ -815,6 +749,79 @@
     document.querySelectorAll('[data-go]').forEach((button) => {
         button.addEventListener('click', () => showScreen(button.dataset.go));
     });
+
+    const shortcut = document.querySelector('[data-shortcut]');
+    if (shortcut) {
+        const mobile = window.matchMedia('(max-width: 720px)').matches;
+        const installed = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const copy = shortcut.querySelector('[data-shortcut-copy]');
+        const actions = shortcut.querySelector('[data-shortcut-actions]');
+
+        const closeShortcut = () => {
+            shortcut.hidden = true;
+        };
+
+        const waitForInstall = () => new Promise((resolve) => {
+            if (window.__installPrompt) {
+                resolve(window.__installPrompt);
+                return;
+            }
+            const timer = setTimeout(() => resolve(null), 1800);
+            window.addEventListener('beforeinstallprompt', () => {
+                clearTimeout(timer);
+                resolve(window.__installPrompt);
+            }, { once: true });
+        });
+
+        if (mobile && !installed) {
+            shortcut.hidden = false;
+        }
+
+        shortcut.addEventListener('click', (event) => {
+            if (event.target === shortcut) {
+                closeShortcut();
+            }
+        });
+
+        actions.addEventListener('click', async (event) => {
+            const button = event.target.closest('button');
+            if (!button) {
+                return;
+            }
+            if (button.dataset.shortcutNo !== undefined && button.dataset.shortcutYes === undefined) {
+                closeShortcut();
+                return;
+            }
+            if (button.dataset.shortcutYes === undefined) {
+                return;
+            }
+
+            const ready = window.__installPrompt;
+            button.disabled = true;
+            if (ready) {
+                window.__installPrompt = null;
+                ready.prompt();
+                await ready.userChoice;
+                closeShortcut();
+                return;
+            }
+
+            const prompt = await waitForInstall();
+            if (prompt) {
+                prompt.prompt();
+                await prompt.userChoice;
+                window.__installPrompt = null;
+                closeShortcut();
+                return;
+            }
+
+            copy.textContent = ios
+                ? 'Tap the Share button in Safari, then tap Add to Home Screen.'
+                : 'Open the browser menu and choose Install app or Add to Home screen.';
+            actions.innerHTML = '<button class="shortcut-yes" type="button" data-shortcut-no>OK</button>';
+        });
+    }
 
     const openScreen = document.querySelector('[data-open-screen]')?.dataset.openScreen;
     if (openScreen) {
